@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Calendar, Clock, Users, Shield, ArrowRight, CheckCircle, User, Phone, Mail, MapPin, Stethoscope, Building2, UserCheck } from 'lucide-react';
+import { Calendar, Clock, Users, Shield, ArrowRight, CheckCircle, User, Phone, Mail, MapPin, Stethoscope, Building2, UserCheck, Edit, Save } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -24,7 +24,7 @@ interface TimeSlot {
 type UserType = 'patient' | 'doctor' | 'staff' | null;
 
 const Index = () => {
-  const [currentStep, setCurrentStep] = useState<'splash' | 'login' | 'register' | 'patient-menu' | 'booking' | 'patient-info' | 'confirmation' | 'my-appointments'>('splash');
+  const [currentStep, setCurrentStep] = useState<'splash' | 'login' | 'register' | 'patient-menu' | 'booking' | 'patient-info' | 'confirmation' | 'my-appointments' | 'profile'>('splash');
   const [userType, setUserType] = useState<UserType>(null);
   const [selectedSpecialty, setSelectedSpecialty] = useState('');
   const [selectedDoctor, setSelectedDoctor] = useState('');
@@ -38,6 +38,17 @@ const Index = () => {
     age: '',
     reason: ''
   });
+  const [profileData, setProfileData] = useState({
+    name: 'Juan Pérez',
+    email: 'juan.perez@email.com',
+    phone: '+505 8888-9999',
+    age: '35',
+    address: 'Barrio Central, Managua',
+    emergencyContact: 'María Pérez - +505 7777-8888',
+    bloodType: 'O+',
+    allergies: 'Ninguna conocida'
+  });
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
 
   const specialties = [
     'Medicina General',
@@ -151,6 +162,14 @@ const Index = () => {
       description: "Recibirás un mensaje de confirmación en breve",
     });
     setCurrentStep('patient-menu');
+  };
+
+  const handleSaveProfile = () => {
+    setIsEditingProfile(false);
+    toast({
+      title: "Perfil actualizado",
+      description: "Tu información personal ha sido guardada exitosamente",
+    });
   };
 
   // Pantalla Splash/Bienvenida (1.1)
@@ -479,7 +498,10 @@ const Index = () => {
               </CardContent>
             </Card>
 
-            <Card className="cursor-pointer hover:shadow-lg transition-all duration-300 bg-white/80 backdrop-blur-sm border-0">
+            <Card 
+              className="cursor-pointer hover:shadow-lg transition-all duration-300 bg-white/80 backdrop-blur-sm border-0"
+              onClick={() => setCurrentStep('profile')}
+            >
               <CardContent className="p-6">
                 <div className="flex items-center space-x-4">
                   <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full flex items-center justify-center">
@@ -490,6 +512,165 @@ const Index = () => {
                     <p className="text-gray-600">Actualizar información personal</p>
                   </div>
                   <ArrowRight className="w-5 h-5 text-gray-400 ml-auto" />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Pantalla Mi Perfil
+  if (currentStep === 'profile') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50">
+        <header className="bg-white/80 backdrop-blur-sm border-b border-green-100 p-4">
+          <div className="flex items-center gap-4">
+            <Button 
+              variant="ghost" 
+              onClick={() => setCurrentStep('patient-menu')}
+            >
+              ← Volver
+            </Button>
+            <h1 className="text-xl font-bold text-gray-800">Mi Perfil</h1>
+          </div>
+        </header>
+
+        <div className="container mx-auto px-4 py-8 max-w-2xl">
+          <div className="space-y-6">
+            <div className="text-center">
+              <div className="w-24 h-24 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <User className="w-12 h-12 text-white" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-800">{profileData.name}</h2>
+              <p className="text-gray-600">{profileData.email}</p>
+            </div>
+
+            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle>Información Personal</CardTitle>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => isEditingProfile ? handleSaveProfile() : setIsEditingProfile(true)}
+                >
+                  {isEditingProfile ? (
+                    <>
+                      <Save className="w-4 h-4 mr-2" />
+                      Guardar
+                    </>
+                  ) : (
+                    <>
+                      <Edit className="w-4 h-4 mr-2" />
+                      Editar
+                    </>
+                  )}
+                </Button>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="profileName">Nombre completo</Label>
+                    <Input
+                      id="profileName"
+                      value={profileData.name}
+                      onChange={(e) => setProfileData({...profileData, name: e.target.value})}
+                      disabled={!isEditingProfile}
+                      className={!isEditingProfile ? "bg-gray-50" : ""}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="profileAge">Edad</Label>
+                    <Input
+                      id="profileAge"
+                      type="number"
+                      value={profileData.age}
+                      onChange={(e) => setProfileData({...profileData, age: e.target.value})}
+                      disabled={!isEditingProfile}
+                      className={!isEditingProfile ? "bg-gray-50" : ""}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="profileEmail">Correo electrónico</Label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <Input
+                        id="profileEmail"
+                        type="email"
+                        value={profileData.email}
+                        onChange={(e) => setProfileData({...profileData, email: e.target.value})}
+                        disabled={!isEditingProfile}
+                        className={`pl-10 ${!isEditingProfile ? "bg-gray-50" : ""}`}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="profilePhone">Teléfono</Label>
+                    <div className="relative">
+                      <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <Input
+                        id="profilePhone"
+                        type="tel"
+                        value={profileData.phone}
+                        onChange={(e) => setProfileData({...profileData, phone: e.target.value})}
+                        disabled={!isEditingProfile}
+                        className={`pl-10 ${!isEditingProfile ? "bg-gray-50" : ""}`}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="profileAddress">Dirección</Label>
+                  <div className="relative">
+                    <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <Input
+                      id="profileAddress"
+                      value={profileData.address}
+                      onChange={(e) => setProfileData({...profileData, address: e.target.value})}
+                      disabled={!isEditingProfile}
+                      className={`pl-10 ${!isEditingProfile ? "bg-gray-50" : ""}`}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="profileBloodType">Tipo de sangre</Label>
+                    <Input
+                      id="profileBloodType"
+                      value={profileData.bloodType}
+                      onChange={(e) => setProfileData({...profileData, bloodType: e.target.value})}
+                      disabled={!isEditingProfile}
+                      className={!isEditingProfile ? "bg-gray-50" : ""}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="profileEmergencyContact">Contacto de emergencia</Label>
+                    <Input
+                      id="profileEmergencyContact"
+                      value={profileData.emergencyContact}
+                      onChange={(e) => setProfileData({...profileData, emergencyContact: e.target.value})}
+                      disabled={!isEditingProfile}
+                      className={!isEditingProfile ? "bg-gray-50" : ""}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="profileAllergies">Alergias conocidas</Label>
+                  <Textarea
+                    id="profileAllergies"
+                    value={profileData.allergies}
+                    onChange={(e) => setProfileData({...profileData, allergies: e.target.value})}
+                    disabled={!isEditingProfile}
+                    className={!isEditingProfile ? "bg-gray-50" : ""}
+                    rows={3}
+                  />
                 </div>
               </CardContent>
             </Card>
