@@ -1,6 +1,5 @@
-
 import { useState } from 'react';
-import { Calendar, Clock, Users, Shield, ArrowRight, CheckCircle, User, Phone, Mail, MapPin } from 'lucide-react';
+import { Calendar, Clock, Users, Shield, ArrowRight, CheckCircle, User, Phone, Mail, MapPin, Stethoscope, Building2, UserCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -22,12 +21,16 @@ interface TimeSlot {
   available: boolean;
 }
 
+type UserType = 'patient' | 'doctor' | 'staff' | null;
+
 const Index = () => {
-  const [currentStep, setCurrentStep] = useState<'home' | 'booking' | 'patient-info' | 'confirmation'>('home');
+  const [currentStep, setCurrentStep] = useState<'splash' | 'login' | 'register' | 'patient-menu' | 'booking' | 'patient-info' | 'confirmation' | 'my-appointments'>('splash');
+  const [userType, setUserType] = useState<UserType>(null);
   const [selectedSpecialty, setSelectedSpecialty] = useState('');
   const [selectedDoctor, setSelectedDoctor] = useState('');
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedTime, setSelectedTime] = useState('');
+  const [selectedHealthCenter, setSelectedHealthCenter] = useState('');
   const [patientData, setPatientData] = useState({
     name: '',
     email: '',
@@ -45,6 +48,14 @@ const Index = () => {
     'Neurología',
     'Traumatología',
     'Psiquiatría'
+  ];
+
+  const healthCenters = [
+    'Centro de Salud Central',
+    'Hospital Nacional',
+    'Clínica San José',
+    'Centro de Salud Norte',
+    'Hospital Materno Infantil'
   ];
 
   const doctors: Doctor[] = [
@@ -79,23 +90,35 @@ const Index = () => {
   ];
 
   const timeSlots: TimeSlot[] = [
-    { time: '09:00', available: true },
+    { time: '08:00', available: true },
+    { time: '08:30', available: true },
+    { time: '09:00', available: false },
     { time: '09:30', available: true },
-    { time: '10:00', available: false },
-    { time: '10:30', available: true },
+    { time: '10:00', available: true },
+    { time: '10:30', available: false },
     { time: '11:00', available: true },
-    { time: '11:30', available: false },
     { time: '14:00', available: true },
     { time: '14:30', available: true },
     { time: '15:00', available: true },
     { time: '15:30', available: false },
-    { time: '16:00', available: true },
-    { time: '16:30', available: true }
+    { time: '16:00', available: true }
   ];
 
   const filteredDoctors = doctors.filter(doctor => 
     selectedSpecialty === '' || doctor.specialty === selectedSpecialty
   );
+
+  const handleUserTypeSelection = (type: UserType) => {
+    setUserType(type);
+    setCurrentStep('login');
+  };
+
+  const handleLogin = () => {
+    if (userType === 'patient') {
+      setCurrentStep('patient-menu');
+    }
+    // TODO: Implementar flujos para doctor y staff
+  };
 
   const handlePatientSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -111,10 +134,10 @@ const Index = () => {
   };
 
   const handleBookingSubmit = () => {
-    if (!selectedDoctor || !selectedDate || !selectedTime) {
+    if (!selectedDoctor || !selectedDate || !selectedTime || !selectedHealthCenter) {
       toast({
         title: "Error",
-        description: "Por favor selecciona doctor, fecha y hora",
+        description: "Por favor selecciona centro de salud, especialidad, doctor, fecha y hora",
         variant: "destructive"
       });
       return;
@@ -125,155 +148,475 @@ const Index = () => {
   const confirmAppointment = () => {
     toast({
       title: "¡Cita confirmada!",
-      description: "Recibirás un email de confirmación en breve",
+      description: "Recibirás un mensaje de confirmación en breve",
     });
-    // Reset form
-    setCurrentStep('home');
-    setSelectedSpecialty('');
-    setSelectedDoctor('');
-    setSelectedDate('');
-    setSelectedTime('');
-    setPatientData({ name: '', email: '', phone: '', age: '', reason: '' });
+    setCurrentStep('patient-menu');
   };
 
-  if (currentStep === 'home') {
+  // Pantalla Splash/Bienvenida (1.1)
+  if (currentStep === 'splash') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
-        {/* Header */}
-        <header className="bg-white/80 backdrop-blur-sm border-b border-blue-100 sticky top-0 z-50">
-          <div className="container mx-auto px-4 py-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl flex items-center justify-center">
-                  <Calendar className="w-6 h-6 text-white" />
-                </div>
-                <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
-                  MediCitas
-                </span>
-              </div>
-              <Button 
-                onClick={() => setCurrentStep('booking')}
-                className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-2 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
-              >
-                Agendar Cita
-                <ArrowRight className="ml-2 w-4 h-4" />
-              </Button>
-            </div>
+      <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50 flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto px-6">
+          <div className="w-24 h-24 bg-gradient-to-r from-green-600 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-8 shadow-xl">
+            <Stethoscope className="w-12 h-12 text-white" />
           </div>
-        </header>
+          
+          <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+            MiCitaMINSA
+          </h1>
+          
+          <p className="text-lg text-gray-600 mb-8">
+            Sistema Nacional de Citas Médicas
+          </p>
 
-        {/* Hero Section */}
-        <section className="py-20 px-4">
-          <div className="container mx-auto text-center">
-            <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-blue-600 via-blue-700 to-green-600 bg-clip-text text-transparent">
-              Tu salud, nuestra prioridad
-            </h1>
-            <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed">
-              Agenda citas médicas de forma rápida y segura con los mejores especialistas. 
-              Tu bienestar está a un click de distancia.
-            </p>
+          <div className="space-y-4">
+            <h2 className="text-xl font-semibold text-gray-800 mb-6">
+              Selecciona tu tipo de usuario
+            </h2>
+            
             <Button 
-              onClick={() => setCurrentStep('booking')}
+              onClick={() => handleUserTypeSelection('patient')}
+              className="w-full bg-green-600 hover:bg-green-700 text-white py-4 rounded-xl shadow-lg flex items-center justify-center gap-3"
               size="lg"
-              className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-8 py-4 rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
             >
-              <Calendar className="mr-2 w-5 h-5" />
-              Agendar mi cita ahora
+              <User className="w-5 h-5" />
+              Soy Paciente
+            </Button>
+            
+            <Button 
+              onClick={() => handleUserTypeSelection('doctor')}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-xl shadow-lg flex items-center justify-center gap-3"
+              size="lg"
+            >
+              <Stethoscope className="w-5 h-5" />
+              Soy Doctor
+            </Button>
+            
+            <Button 
+              onClick={() => handleUserTypeSelection('staff')}
+              className="w-full bg-purple-600 hover:bg-purple-700 text-white py-4 rounded-xl shadow-lg flex items-center justify-center gap-3"
+              size="lg"
+            >
+              <Building2 className="w-5 h-5" />
+              Personal del Centro de Salud
             </Button>
           </div>
-        </section>
-
-        {/* Features */}
-        <section className="py-16 px-4 bg-white/50 backdrop-blur-sm">
-          <div className="container mx-auto">
-            <h2 className="text-3xl font-bold text-center mb-12 text-gray-800">
-              ¿Por qué elegir MediCitas?
-            </h2>
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-              {[
-                {
-                  icon: <Clock className="w-8 h-8 text-blue-600" />,
-                  title: "Ahorra tiempo",
-                  description: "Agenda en minutos desde cualquier lugar"
-                },
-                {
-                  icon: <Users className="w-8 h-8 text-green-600" />,
-                  title: "Mejores doctores",
-                  description: "Profesionales certificados y especializados"
-                },
-                {
-                  icon: <Shield className="w-8 h-8 text-blue-600" />,
-                  title: "100% seguro",
-                  description: "Tus datos están protegidos y encriptados"
-                },
-                {
-                  icon: <CheckCircle className="w-8 h-8 text-green-600" />,
-                  title: "Confirmación inmediata",
-                  description: "Recibe confirmación al instante por email"
-                }
-              ].map((feature, index) => (
-                <Card key={index} className="text-center hover:shadow-lg transition-all duration-300 border-0 bg-white/80 backdrop-blur-sm">
-                  <CardHeader>
-                    <div className="mx-auto w-16 h-16 bg-gradient-to-r from-blue-50 to-green-50 rounded-full flex items-center justify-center mb-4">
-                      {feature.icon}
-                    </div>
-                    <CardTitle className="text-gray-800">{feature.title}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-gray-600">{feature.description}</p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* CTA Section */}
-        <section className="py-20 px-4 bg-gradient-to-r from-blue-600 to-blue-800">
-          <div className="container mx-auto text-center">
-            <h2 className="text-4xl font-bold text-white mb-6">
-              ¿Listo para cuidar tu salud?
-            </h2>
-            <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-              Miles de pacientes ya confían en nosotros para sus citas médicas
-            </p>
-            <Button 
-              onClick={() => setCurrentStep('booking')}
-              size="lg"
-              className="bg-white text-blue-600 hover:bg-gray-50 px-8 py-4 rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
-            >
-              Comenzar ahora
-              <ArrowRight className="ml-2 w-5 h-5" />
-            </Button>
-          </div>
-        </section>
+        </div>
       </div>
     );
   }
 
-  if (currentStep === 'booking') {
+  // Pantalla Login/Registro (1.2)
+  if (currentStep === 'login') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 py-8">
-        <div className="container mx-auto px-4 max-w-4xl">
-          <div className="mb-8">
+      <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50 flex items-center justify-center">
+        <div className="w-full max-w-md mx-auto px-6">
+          <div className="text-center mb-8">
             <Button 
-              variant="outline" 
-              onClick={() => setCurrentStep('home')}
-              className="mb-4"
+              variant="ghost" 
+              onClick={() => setCurrentStep('splash')}
+              className="absolute top-4 left-4"
             >
-              ← Volver al inicio
+              ← Volver
             </Button>
-            <h1 className="text-3xl font-bold text-gray-800 mb-2">Agendar nueva cita</h1>
-            <p className="text-gray-600">Selecciona especialidad, doctor, fecha y hora</p>
+            
+            <div className="w-16 h-16 bg-gradient-to-r from-green-600 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+              {userType === 'patient' && <User className="w-8 h-8 text-white" />}
+              {userType === 'doctor' && <Stethoscope className="w-8 h-8 text-white" />}
+              {userType === 'staff' && <Building2 className="w-8 h-8 text-white" />}
+            </div>
+            
+            <h1 className="text-2xl font-bold text-gray-800 mb-2">
+              Iniciar Sesión
+            </h1>
+            <p className="text-gray-600">
+              {userType === 'patient' && 'Accede como paciente'}
+              {userType === 'doctor' && 'Accede como doctor'}
+              {userType === 'staff' && 'Accede como personal de salud'}
+            </p>
           </div>
 
+          <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl">
+            <CardContent className="p-6">
+              <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); handleLogin(); }}>
+                <div>
+                  <Label htmlFor="email">Correo electrónico</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="tu@email.com"
+                    className="w-full"
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="password">Contraseña</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="••••••••"
+                    className="w-full"
+                    required
+                  />
+                </div>
+
+                <Button 
+                  type="submit"
+                  className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white py-3 rounded-xl"
+                  size="lg"
+                >
+                  Iniciar Sesión
+                </Button>
+              </form>
+              
+              <div className="mt-6 text-center">
+                <p className="text-gray-600">
+                  ¿No tienes cuenta?{' '}
+                  <button 
+                    onClick={() => setCurrentStep('register')}
+                    className="text-blue-600 hover:underline font-medium"
+                  >
+                    Regístrate aquí
+                  </button>
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  // Pantalla de Registro (1.3)
+  if (currentStep === 'register') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50 py-8">
+        <div className="w-full max-w-md mx-auto px-6">
+          <div className="text-center mb-8">
+            <Button 
+              variant="ghost" 
+              onClick={() => setCurrentStep('login')}
+              className="absolute top-4 left-4"
+            >
+              ← Volver
+            </Button>
+            
+            <h1 className="text-2xl font-bold text-gray-800 mb-2">
+              Registro
+            </h1>
+            <p className="text-gray-600">
+              Crea tu cuenta según tu rol
+            </p>
+          </div>
+
+          <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl">
+            <CardContent className="p-6">
+              <form className="space-y-4">
+                <div>
+                  <Label htmlFor="fullName">Nombre completo</Label>
+                  <Input
+                    id="fullName"
+                    type="text"
+                    placeholder="Tu nombre completo"
+                    className="w-full"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="email">Correo electrónico</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="tu@email.com"
+                    className="w-full"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="phone">Teléfono</Label>
+                  <Input
+                    id="phone"
+                    type="tel"
+                    placeholder="+505 xxxx-xxxx"
+                    className="w-full"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="password">Contraseña</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="••••••••"
+                    className="w-full"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="confirmPassword">Confirmar contraseña</Label>
+                  <Input
+                    id="confirmPassword"
+                    type="password"
+                    placeholder="••••••••"
+                    className="w-full"
+                    required
+                  />
+                </div>
+
+                {userType === 'doctor' && (
+                  <>
+                    <div>
+                      <Label htmlFor="medicalLicense">Número de colegiación</Label>
+                      <Input
+                        id="medicalLicense"
+                        type="text"
+                        placeholder="Número de colegiación médica"
+                        className="w-full"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="specialty">Especialidad</Label>
+                      <Select>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecciona tu especialidad" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {specialties.map((specialty) => (
+                            <SelectItem key={specialty} value={specialty}>
+                              {specialty}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </>
+                )}
+
+                <Button 
+                  type="submit"
+                  className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white py-3 rounded-xl"
+                  size="lg"
+                  onClick={() => setCurrentStep('login')}
+                >
+                  Crear Cuenta
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  // Menú Principal del Paciente (2.1)
+  if (currentStep === 'patient-menu') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50">
+        <header className="bg-white/80 backdrop-blur-sm border-b border-green-100 p-4">
+          <div className="flex items-center justify-between">
+            <h1 className="text-xl font-bold text-gray-800">MiCitaMINSA</h1>
+            <Button 
+              variant="ghost" 
+              onClick={() => setCurrentStep('splash')}
+              className="text-gray-600"
+            >
+              Cerrar Sesión
+            </Button>
+          </div>
+        </header>
+
+        <div className="container mx-auto px-4 py-8 max-w-2xl">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">
+              Bienvenido, Paciente
+            </h2>
+            <p className="text-gray-600">
+              ¿Qué deseas hacer hoy?
+            </p>
+          </div>
+
+          <div className="grid gap-4">
+            <Card 
+              className="cursor-pointer hover:shadow-lg transition-all duration-300 bg-white/80 backdrop-blur-sm border-0"
+              onClick={() => setCurrentStep('booking')}
+            >
+              <CardContent className="p-6">
+                <div className="flex items-center space-x-4">
+                  <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center">
+                    <Calendar className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-800">Programar Nueva Cita</h3>
+                    <p className="text-gray-600">Agenda una cita médica rápidamente</p>
+                  </div>
+                  <ArrowRight className="w-5 h-5 text-gray-400 ml-auto" />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card 
+              className="cursor-pointer hover:shadow-lg transition-all duration-300 bg-white/80 backdrop-blur-sm border-0"
+              onClick={() => setCurrentStep('my-appointments')}
+            >
+              <CardContent className="p-6">
+                <div className="flex items-center space-x-4">
+                  <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
+                    <Clock className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-800">Mis Citas Programadas</h3>
+                    <p className="text-gray-600">Ver, cancelar o reprogramar citas</p>
+                  </div>
+                  <ArrowRight className="w-5 h-5 text-gray-400 ml-auto" />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="cursor-pointer hover:shadow-lg transition-all duration-300 bg-white/80 backdrop-blur-sm border-0">
+              <CardContent className="p-6">
+                <div className="flex items-center space-x-4">
+                  <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full flex items-center justify-center">
+                    <User className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-800">Mi Perfil</h3>
+                    <p className="text-gray-600">Actualizar información personal</p>
+                  </div>
+                  <ArrowRight className="w-5 h-5 text-gray-400 ml-auto" />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Pantalla Mis Citas Programadas (2.4)
+  if (currentStep === 'my-appointments') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50">
+        <header className="bg-white/80 backdrop-blur-sm border-b border-green-100 p-4">
+          <div className="flex items-center gap-4">
+            <Button 
+              variant="ghost" 
+              onClick={() => setCurrentStep('patient-menu')}
+            >
+              ← Volver
+            </Button>
+            <h1 className="text-xl font-bold text-gray-800">Mis Citas Programadas</h1>
+          </div>
+        </header>
+
+        <div className="container mx-auto px-4 py-8 max-w-4xl">
+          <div className="space-y-4">
+            {/* Ejemplo de citas programadas */}
+            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+              <CardContent className="p-6">
+                <div className="flex justify-between items-start">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Calendar className="w-4 h-4 text-blue-600" />
+                      <span className="font-semibold">15 de Enero, 2024 - 10:00 AM</span>
+                    </div>
+                    <h3 className="font-semibold text-lg">Dr. María González</h3>
+                    <p className="text-gray-600">Medicina General</p>
+                    <p className="text-sm text-gray-500 mt-1">Centro de Salud Central</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm">
+                      Reprogramar
+                    </Button>
+                    <Button variant="destructive" size="sm">
+                      Cancelar
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+              <CardContent className="p-6">
+                <div className="flex justify-between items-start">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Calendar className="w-4 h-4 text-green-600" />
+                      <span className="font-semibold">20 de Enero, 2024 - 2:30 PM</span>
+                    </div>
+                    <h3 className="font-semibold text-lg">Dr. Carlos Rodríguez</h3>
+                    <p className="text-gray-600">Cardiología</p>
+                    <p className="text-sm text-gray-500 mt-1">Hospital Nacional</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm">
+                      Reprogramar
+                    </Button>
+                    <Button variant="destructive" size="sm">
+                      Cancelar
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Programar Cita (2.2)
+  if (currentStep === 'booking') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50">
+        <header className="bg-white/80 backdrop-blur-sm border-b border-green-100 p-4">
+          <div className="flex items-center gap-4">
+            <Button 
+              variant="ghost" 
+              onClick={() => setCurrentStep('patient-menu')}
+            >
+              ← Volver
+            </Button>
+            <h1 className="text-xl font-bold text-gray-800">Programar Nueva Cita</h1>
+          </div>
+        </header>
+
+        <div className="container mx-auto px-4 py-8 max-w-4xl">
           <div className="grid lg:grid-cols-2 gap-8">
-            {/* Especialidades y Doctores */}
             <div className="space-y-6">
               <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Users className="w-5 h-5 text-blue-600" />
+                    <Building2 className="w-5 h-5 text-green-600" />
+                    Centro de Salud
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Select value={selectedHealthCenter} onValueChange={setSelectedHealthCenter}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecciona un centro de salud" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {healthCenters.map((center) => (
+                        <SelectItem key={center} value={center}>
+                          {center}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Stethoscope className="w-5 h-5 text-blue-600" />
                     Especialidad
                   </CardTitle>
                 </CardHeader>
@@ -296,7 +639,7 @@ const Index = () => {
               <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <User className="w-5 h-5 text-blue-600" />
+                    <User className="w-5 h-5 text-purple-600" />
                     Doctores disponibles
                   </CardTitle>
                 </CardHeader>
@@ -329,12 +672,11 @@ const Index = () => {
               </Card>
             </div>
 
-            {/* Fecha y Hora */}
             <div className="space-y-6">
               <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Calendar className="w-5 h-5 text-blue-600" />
+                    <Calendar className="w-5 h-5 text-green-600" />
                     Fecha
                   </CardTitle>
                 </CardHeader>
@@ -352,7 +694,7 @@ const Index = () => {
               <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Clock className="w-5 h-5 text-blue-600" />
+                    <Clock className="w-5 h-5 text-orange-600" />
                     Horarios disponibles
                   </CardTitle>
                 </CardHeader>
@@ -381,7 +723,7 @@ const Index = () => {
 
               <Button 
                 onClick={handleBookingSubmit}
-                className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+                className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
                 size="lg"
               >
                 Continuar con datos del paciente
@@ -460,7 +802,7 @@ const Index = () => {
                           value={patientData.phone}
                           onChange={(e) => setPatientData({...patientData, phone: e.target.value})}
                           className="mt-2 pl-10"
-                          placeholder="+1 234 567 8900"
+                          placeholder="+505 xxxx-xxxx"
                           required
                         />
                       </div>
@@ -516,6 +858,7 @@ const Index = () => {
 
   if (currentStep === 'confirmation') {
     const selectedDoctorData = doctors.find(d => d.id === selectedDoctor);
+    const selectedHealthCenterName = selectedHealthCenter;
     
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50 py-8">
@@ -535,7 +878,15 @@ const Index = () => {
             <CardContent className="p-8">
               <div className="space-y-6">
                 <div className="flex items-center space-x-4 p-4 bg-blue-50 rounded-lg">
-                  <User className="w-8 h-8 text-blue-600" />
+                  <Building2 className="w-8 h-8 text-blue-600" />
+                  <div>
+                    <h3 className="font-semibold text-gray-800">Centro de Salud</h3>
+                    <p className="text-gray-600">{selectedHealthCenterName}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-4 p-4 bg-purple-50 rounded-lg">
+                  <User className="w-8 h-8 text-purple-600" />
                   <div>
                     <h3 className="font-semibold text-gray-800">Doctor</h3>
                     <p className="text-gray-600">{selectedDoctorData?.name}</p>
@@ -551,8 +902,8 @@ const Index = () => {
                   </div>
                 </div>
 
-                <div className="flex items-center space-x-4 p-4 bg-purple-50 rounded-lg">
-                  <User className="w-8 h-8 text-purple-600" />
+                <div className="flex items-center space-x-4 p-4 bg-orange-50 rounded-lg">
+                  <User className="w-8 h-8 text-orange-600" />
                   <div>
                     <h3 className="font-semibold text-gray-800">Paciente</h3>
                     <p className="text-gray-600">{patientData.name}</p>
@@ -572,21 +923,14 @@ const Index = () => {
 
           <div className="text-center space-y-4">
             <p className="text-gray-600">
-              Recibirás un email de confirmación en breve con todos los detalles
+              Recibirás un mensaje de confirmación en breve con todos los detalles
             </p>
             <div className="flex gap-4 justify-center">
               <Button 
                 onClick={confirmAppointment}
-                className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-8 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+                className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white px-8 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
               >
-                Agendar otra cita
-              </Button>
-              <Button 
-                variant="outline"
-                onClick={() => setCurrentStep('home')}
-                className="px-8 py-3 rounded-xl"
-              >
-                Volver al inicio
+                Volver al menú principal
               </Button>
             </div>
           </div>
