@@ -31,6 +31,10 @@ const Index = () => {
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedTime, setSelectedTime] = useState('');
   const [selectedHealthCenter, setSelectedHealthCenter] = useState('');
+  const [loginData, setLoginData] = useState({
+    email: '',
+    password: ''
+  });
   const [patientData, setPatientData] = useState({
     name: '',
     email: '',
@@ -124,11 +128,51 @@ const Index = () => {
     setCurrentStep('login');
   };
 
-  const handleLogin = () => {
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Validación básica de campos
+    if (!loginData.email || !loginData.password) {
+      toast({
+        title: "Error",
+        description: "Por favor completa todos los campos",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Validación básica de email
+    if (!loginData.email.includes('@')) {
+      toast({
+        title: "Error",
+        description: "Por favor ingresa un correo válido",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Simulación de login exitoso
+    toast({
+      title: "¡Bienvenido!",
+      description: "Has iniciado sesión correctamente",
+    });
+
+    // Redirigir según el tipo de usuario
     if (userType === 'patient') {
       setCurrentStep('patient-menu');
+    } else if (userType === 'doctor') {
+      // TODO: Implementar flujo para doctor
+      toast({
+        title: "Próximamente",
+        description: "El panel de doctor estará disponible pronto",
+      });
+    } else if (userType === 'staff') {
+      // TODO: Implementar flujo para staff
+      toast({
+        title: "Próximamente",
+        description: "El panel de personal estará disponible pronto",
+      });
     }
-    // TODO: Implementar flujos para doctor y staff
   };
 
   const handlePatientSubmit = (e: React.FormEvent) => {
@@ -226,7 +270,7 @@ const Index = () => {
     );
   }
 
-  // Pantalla Login/Registro (1.2)
+  // Pantalla Login/Registro con formulario funcional
   if (currentStep === 'login') {
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50 flex items-center justify-center">
@@ -258,7 +302,7 @@ const Index = () => {
 
           <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl">
             <CardContent className="p-6">
-              <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); handleLogin(); }}>
+              <form className="space-y-4" onSubmit={handleLogin}>
                 <div>
                   <Label htmlFor="email">Correo electrónico</Label>
                   <Input
@@ -266,6 +310,8 @@ const Index = () => {
                     type="email"
                     placeholder="tu@email.com"
                     className="w-full"
+                    value={loginData.email}
+                    onChange={(e) => setLoginData({...loginData, email: e.target.value})}
                     required
                   />
                 </div>
@@ -277,6 +323,8 @@ const Index = () => {
                     type="password"
                     placeholder="••••••••"
                     className="w-full"
+                    value={loginData.password}
+                    onChange={(e) => setLoginData({...loginData, password: e.target.value})}
                     required
                   />
                 </div>
