@@ -38,7 +38,7 @@ interface UserData {
 }
 
 type UserType = 'patient' | 'doctor' | 'staff' | null;
-type CurrentStep = 'splash' | 'login' | 'register' | 'patient-menu' | 'booking' | 'patient-info' | 'confirmation' | 'my-appointments' | 'profile' | 'doctor-dashboard' | 'staff-dashboard' | 'patient-history';
+type CurrentStep = 'splash' | 'login' | 'register' | 'forgot-password' | 'patient-menu' | 'booking' | 'patient-info' | 'confirmation' | 'my-appointments' | 'profile' | 'doctor-dashboard' | 'staff-dashboard' | 'patient-history';
 
 const Index = () => {
   const [currentStep, setCurrentStep] = useState<CurrentStep>('splash');
@@ -52,6 +52,7 @@ const Index = () => {
     email: '',
     password: ''
   });
+  const [forgotPasswordEmail, setForgotPasswordEmail] = useState('');
   const [registrationData, setRegistrationData] = useState<UserData>({
     name: '',
     email: '',
@@ -303,6 +304,36 @@ const Index = () => {
     setCurrentStep('patient-history');
   };
 
+  const handleForgotPassword = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!forgotPasswordEmail) {
+      toast({
+        title: "Error",
+        description: "Por favor ingresa tu correo electrónico",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!forgotPasswordEmail.includes('@')) {
+      toast({
+        title: "Error",
+        description: "Por favor ingresa un correo válido",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    toast({
+      title: "¡Correo enviado!",
+      description: "Hemos enviado las instrucciones de recuperación a tu correo electrónico",
+    });
+
+    setForgotPasswordEmail('');
+    setCurrentStep('login');
+  };
+
   // Pantalla Splash/Bienvenida
   if (currentStep === 'splash') {
     return (
@@ -425,16 +456,27 @@ const Index = () => {
                 </Button>
               </form>
               
-              <div className="mt-4 sm:mt-6 text-center">
-                <p className="text-sm sm:text-base text-gray-600">
-                  ¿No tienes cuenta?{' '}
+              <div className="mt-4 sm:mt-6 text-center space-y-3">
+                <div className="text-center">
                   <button 
-                    onClick={() => setCurrentStep('register')}
-                    className="text-blue-600 hover:underline font-medium"
+                    onClick={() => setCurrentStep('forgot-password')}
+                    className="text-blue-600 hover:underline font-medium text-sm sm:text-base"
                   >
-                    Regístrate aquí
+                    ¿Olvidaste tu contraseña?
                   </button>
-                </p>
+                </div>
+                
+                <div className="border-t pt-3">
+                  <p className="text-sm sm:text-base text-gray-600">
+                    ¿No tienes cuenta?{' '}
+                    <button 
+                      onClick={() => setCurrentStep('register')}
+                      className="text-blue-600 hover:underline font-medium"
+                    >
+                      Regístrate aquí
+                    </button>
+                  </p>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -569,6 +611,75 @@ const Index = () => {
                   Crear Cuenta
                 </Button>
               </form>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  // Pantalla de Recuperación de Contraseña
+  if (currentStep === 'forgot-password') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50 flex items-center justify-center p-4">
+        <div className="w-full max-w-md mx-auto">
+          <div className="text-center mb-6 sm:mb-8">
+            <Button 
+              variant="ghost" 
+              onClick={() => setCurrentStep('login')}
+              className="absolute top-4 left-4 text-sm sm:text-base"
+            >
+              ← Volver
+            </Button>
+            
+            <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-r from-green-600 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Mail className="w-7 h-7 sm:w-8 sm:h-8 text-white" />
+            </div>
+            
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-800 mb-2">
+              Recuperar Contraseña
+            </h1>
+            <p className="text-sm sm:text-base text-gray-600 px-4">
+              Ingresa tu correo electrónico y te enviaremos las instrucciones para restablecer tu contraseña
+            </p>
+          </div>
+
+          <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl mx-4 sm:mx-0">
+            <CardContent className="p-4 sm:p-6">
+              <form className="space-y-4" onSubmit={handleForgotPassword}>
+                <div>
+                  <Label htmlFor="recovery-email" className="text-sm sm:text-base">Correo electrónico</Label>
+                  <Input
+                    id="recovery-email"
+                    type="email"
+                    placeholder="tu@email.com"
+                    className="w-full mt-1"
+                    value={forgotPasswordEmail}
+                    onChange={(e) => setForgotPasswordEmail(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <Button 
+                  type="submit"
+                  className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white py-3 rounded-xl text-sm sm:text-base"
+                  size="lg"
+                >
+                  Enviar Instrucciones
+                </Button>
+              </form>
+              
+              <div className="mt-4 sm:mt-6 text-center">
+                <p className="text-sm sm:text-base text-gray-600">
+                  ¿Recordaste tu contraseña?{' '}
+                  <button 
+                    onClick={() => setCurrentStep('login')}
+                    className="text-blue-600 hover:underline font-medium"
+                  >
+                    Inicia sesión
+                  </button>
+                </p>
+              </div>
             </CardContent>
           </Card>
         </div>
