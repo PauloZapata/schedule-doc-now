@@ -1,0 +1,62 @@
+<div class="min-h-screen bg-gradient-to-br from-yellow-50 via-white to-orange-50 flex items-center justify-center p-4">
+  <div class="w-full max-w-md mx-auto text-center">
+    <!-- Icono de reloj -->
+    <div class="w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 sm:w-12 sm:h-12 text-white" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <polyline points="12 6 12 12 16 14"/>
+      </svg>
+    </div>
+    
+    <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-4">
+      Verificación Pendiente
+    </h1>
+    
+    <!-- Card con información -->
+    <div class="bg-white/80 backdrop-blur-sm border-0 shadow-xl rounded-lg mb-6">
+      <div class="p-6 sm:p-8">
+        <div class="space-y-4">
+          <!-- Estado -->
+          <div class="flex items-center justify-center gap-3 p-4 bg-yellow-50 rounded-lg">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-yellow-600" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/>
+              <path d="M12 9v4"/>
+              <path d="M12 17h.01"/>
+            </svg>
+            <span class="text-yellow-800 font-medium">Estado: En revisión</span>
+          </div>
+          
+          <p class="text-gray-600">
+            Hola <span class="font-semibold">{{ currentUser?.name }}</span>, tu cuenta de doctor ha sido creada exitosamente.
+          </p>
+          
+          <p class="text-gray-600">
+            Un administrador debe verificar tu número de colegiatura <span class="font-semibold">({{ currentUser?.medicalLicense }})</span> antes de que puedas acceder al panel de citas.
+          </p>
+          
+          <!-- Información del doctor -->
+          <div class="bg-blue-50 p-4 rounded-lg">
+            <p class="text-sm text-blue-800">
+              <strong>Especialidad registrada:</strong> {{ currentUser?.specialty }}
+            </p>
+            <p class="text-sm text-blue-800 mt-1">
+              <strong>Correo:</strong> {{ currentUser?.email }}
+            </p>
+          </div>
+          
+          <p class="text-sm text-gray-500">
+            Te notificaremos por correo electrónico cuando tu cuenta sea aprobada. Este proceso puede tomar de 24 a 48 horas hábiles.
+          </p>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Botón cerrar sesión -->
+    <button 
+      (click)="logout()"
+      class="w-full max-w-xs px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+    >
+      Cerrar Sesión
+    </button>
+  </div>
+</div>

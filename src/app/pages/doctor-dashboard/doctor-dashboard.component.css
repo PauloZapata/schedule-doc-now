@@ -1,0 +1,30 @@
+/* Estilos adicionales para el Doctor Dashboard */
+
+/* Animaciones suaves para las tarjetas */
+.bg-white\/80 {
+  transition: all 0.3s ease;
+}
+
+.bg-white\/80:hover {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Mejora en los botones deshabilitados */
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* Estilo para el textarea */
+textarea:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
